@@ -17,7 +17,7 @@ class MasaCineVault(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("MASA CineVault Pro - Movie Catalog")
+        self.title("MASA CineVault Manager")
         self.geometry("780x560")
         self.resizable(False, False)
         self.configure(fg_color="#0A0E17")
@@ -38,7 +38,6 @@ class MasaCineVault(ctk.CTk):
                     rating REAL
                 )
             """)
-            # Seed default demo entries if empty
             cur = conn.cursor()
             cur.execute("SELECT COUNT(*) FROM movies")
             if cur.fetchone()[0] == 0:
@@ -46,9 +45,11 @@ class MasaCineVault(ctk.CTk):
                     ("Inception", "Christopher Nolan", 2010, 8.8),
                     ("The Matrix", "Lana & Lilly Wachowski", 1999, 8.7),
                     ("Interstellar", "Christopher Nolan", 2014, 8.7),
-                    ("Blade Runner 2049", "Denis Villeneuve", 2017, 8.0)
+                    ("Blade Runner 2049", "Denis Villeneuve", 2017, 8.0),
                 ]
-                cur.executemany("INSERT INTO movies (title, director, year, rating) VALUES (?, ?, ?, ?)", demo_movies)
+                cur.executemany(
+                    "INSERT INTO movies (title, director, year, rating) VALUES (?, ?, ?, ?)", demo_movies
+                )
                 conn.commit()
 
     def _build_ui(self):
@@ -59,7 +60,7 @@ class MasaCineVault(ctk.CTk):
             top_card,
             text="MASA CINEVAULT MANAGER",
             font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
-            text_color="#F59E0B"
+            text_color="#F59E0B",
         )
         title.pack(side="left", padx=20, pady=12)
 
@@ -67,19 +68,23 @@ class MasaCineVault(ctk.CTk):
             top_card,
             text="Cinematic Database & Review Archive",
             font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            text_color="#94A3B8",
         )
         subtitle.pack(side="right", padx=20, pady=12)
 
         main_content = ctk.CTkFrame(self, fg_color="transparent")
         main_content.pack(fill="both", expand=True, padx=20, pady=(0, 15))
 
-        # Left input panel
         form_panel = ctk.CTkFrame(main_content, fg_color="#121826", corner_radius=14, width=280)
         form_panel.pack(side="left", fill="y", padx=(0, 10))
         form_panel.pack_propagate(False)
 
-        lbl_form = ctk.CTkLabel(form_panel, text="RECORD MANAGEMENT", font=ctk.CTkFont(size=12, weight="bold"), text_color="#94A3B8")
+        lbl_form = ctk.CTkLabel(
+            form_panel,
+            text="RECORD MANAGEMENT",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#94A3B8",
+        )
         lbl_form.pack(pady=(15, 10))
 
         self.entry_title = self._create_input(form_panel, "Movie Title")
@@ -94,7 +99,7 @@ class MasaCineVault(ctk.CTk):
             fg_color="#D97706",
             hover_color="#B45309",
             corner_radius=8,
-            command=self._add_movie
+            command=self._add_movie,
         )
         btn_add.pack(fill="x", padx=16, pady=(12, 6))
 
@@ -105,11 +110,10 @@ class MasaCineVault(ctk.CTk):
             fg_color="#EF4444",
             hover_color="#DC2626",
             corner_radius=8,
-            command=self._delete_movie
+            command=self._delete_movie,
         )
         btn_del.pack(fill="x", padx=16, pady=(0, 15))
 
-        # Right table view
         table_panel = ctk.CTkFrame(main_content, fg_color="#121826", corner_radius=14)
         table_panel.pack(side="right", fill="both", expand=True)
 
@@ -121,22 +125,27 @@ class MasaCineVault(ctk.CTk):
             placeholder_text="Search movie by title...",
             font=ctk.CTkFont(size=12),
             height=34,
-            corner_radius=8
+            corner_radius=8,
         )
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
         self.search_entry.bind("<KeyRelease>", lambda _: self._refresh_table())
 
-        # Treeview setup
         tree_frame = tk.Frame(table_panel, bg="#121826")
         tree_frame.pack(fill="both", expand=True, padx=16, pady=(0, 16))
 
         style = ttk.Style()
         style.theme_use("clam")
-        style.configure("Treeview", background="#0A0E17", foreground="#F8FAFC", fieldbackground="#0A0E17", rowheight=28)
-        style.configure("Treeview.Heading", background="#1E293B", foreground="#38BDF8", font=("Segoe UI", 10, "bold"))
+        style.configure(
+            "Treeview", background="#0A0E17", foreground="#F8FAFC", fieldbackground="#0A0E17", rowheight=28
+        )
+        style.configure(
+            "Treeview.Heading", background="#1E293B", foreground="#38BDF8", font=("Segoe UI", 10, "bold")
+        )
         style.map("Treeview", background=[("selected", "#D97706")])
 
-        self.tree = ttk.Treeview(tree_frame, columns=("ID", "Title", "Director", "Year", "Rating"), show="headings")
+        self.tree = ttk.Treeview(
+            tree_frame, columns=("ID", "Title", "Director", "Year", "Rating"), show="headings"
+        )
         self.tree.heading("ID", text="ID")
         self.tree.heading("Title", text="Title")
         self.tree.heading("Director", text="Director")
@@ -155,7 +164,9 @@ class MasaCineVault(ctk.CTk):
         scroll.pack(side="right", fill="y")
 
     def _create_input(self, parent, placeholder):
-        e = ctk.CTkEntry(parent, placeholder_text=placeholder, font=ctk.CTkFont(size=12), height=34, corner_radius=8)
+        e = ctk.CTkEntry(
+            parent, placeholder_text=placeholder, font=ctk.CTkFont(size=12), height=34, corner_radius=8
+        )
         e.pack(fill="x", padx=16, pady=4)
         return e
 
@@ -167,7 +178,10 @@ class MasaCineVault(ctk.CTk):
         with sqlite3.connect(self.db_path) as conn:
             cur = conn.cursor()
             if q:
-                cur.execute("SELECT id, title, director, year, rating FROM movies WHERE title LIKE ? ORDER BY id DESC", (f"%{q}%",))
+                cur.execute(
+                    "SELECT id, title, director, year, rating FROM movies WHERE title LIKE ? ORDER BY id DESC",
+                    (f"%{q}%",),
+                )
             else:
                 cur.execute("SELECT id, title, director, year, rating FROM movies ORDER BY id DESC")
             for row in cur.fetchall():
@@ -191,7 +205,10 @@ class MasaCineVault(ctk.CTk):
             return
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("INSERT INTO movies (title, director, year, rating) VALUES (?, ?, ?, ?)", (t, d, year_val, rate_val))
+            conn.execute(
+                "INSERT INTO movies (title, director, year, rating) VALUES (?, ?, ?, ?)",
+                (t, d, year_val, rate_val),
+            )
             conn.commit()
 
         self.entry_title.delete(0, "end")
